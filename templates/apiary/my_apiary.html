@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Моя пасека - We Watch the Bees{% endblock %}
+
+{% block content %}
+  <h1 class="h4 mb-3">Моя пасека</h1>
+
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">{{ apiary.name }}</h5>
+      {% if apiary.location %}
+        <p class="card-text text-muted mb-0">{{ apiary.location }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-body">
+      <h6 class="card-subtitle mb-2 text-muted">Ульи</h6>
+      {% if hives %}
+        <ul class="mb-0">
+          {% for hive in hives %}
+            <li>{{ hive.name }}</li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted mb-0">Пока ульи не добавлены.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+

@@ -1,0 +1,25 @@
+### Python / Django
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+*.log
+*.egg-info/
+*.DS_Store
+.env
+.venv/
+venv/
+ENV/
+
+### Django
+staticfiles/
+media/
+
+### IDE
+.idea/
+
+### Node (для будущего фронтенда/зависимостей)
+node_modules/
+dist/
+build/
+
