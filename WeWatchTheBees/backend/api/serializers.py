@@ -42,3 +42,14 @@ class HiveCreateSerializer(serializers.ModelSerializer):
                 device_id=f"{hive.id}_{stype}_{hive.name}"
             )
         return hive
+
+
+class HiveUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Hive
+        fields = ['name', 'hive_id', 'bee_info']
+        extra_kwargs = {
+            'name': {'required': True},
+            'hive_id': {'required': False, 'allow_blank': True},
+            'bee_info': {'required': False, 'allow_blank': True},
+        }

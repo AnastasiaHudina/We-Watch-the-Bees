@@ -3,3 +3,5 @@ python manage.py runserver
 
 cd frontend
 npm run dev
+
+http://127.0.0.1:8000/admin/

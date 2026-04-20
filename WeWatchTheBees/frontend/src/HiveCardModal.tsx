@@ -2,16 +2,19 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Thermometer, Droplets, Weight } from 'lucide-react';
 import api from './api';
 import type { Hive } from './MyApiariesSection';
+import { EditHiveModal } from './EditHiveModal';      // импорт компонента редактирования
 
 interface HiveCardModalProps {
   hive: Hive;
   onClose: () => void;
   onHiveDeleted?: (id: number) => void;
+  onHiveUpdated?: () => void;          // новый пропс для обновления списка
 }
 
-export function HiveCardModal({ hive, onClose, onHiveDeleted }: HiveCardModalProps) {
+export function HiveCardModal({ hive, onClose, onHiveDeleted, onHiveUpdated }: HiveCardModalProps) {
   const [hiveDetail, setHiveDetail] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);   // состояние для модалки редактирования
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -36,6 +39,16 @@ export function HiveCardModal({ hive, onClose, onHiveDeleted }: HiveCardModalPro
       } catch (err) {
         console.error('Ошибка удаления', err);
       }
+    }
+  };
+
+  const handleSaveEdit = async (id: number, data: { name: string; hive_id?: string; bee_info?: string }) => {
+    try {
+      await api.put(`/hives/${id}/update/`, data);
+      if (onHiveUpdated) onHiveUpdated();   // обновить список ульев в родителе
+      onClose();                             // закрыть карточку
+    } catch (err) {
+      console.error('Ошибка обновления улья', err);
     }
   };
 
@@ -109,7 +122,14 @@ export function HiveCardModal({ hive, onClose, onHiveDeleted }: HiveCardModalPro
             </div>
           </div>
 
+          {/* Кнопки действий */}
           <div className="flex gap-3 mt-6">
+            <button
+              onClick={() => setShowEditModal(true)}
+              className="flex-1 py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600"
+            >
+              Редактировать
+            </button>
             <button
               onClick={handleDelete}
               className="flex-1 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600"
@@ -125,6 +145,19 @@ export function HiveCardModal({ hive, onClose, onHiveDeleted }: HiveCardModalPro
           </div>
         </div>
       </div>
+
+      {/* Модальное окно редактирования улья */}
+      <EditHiveModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onSave={handleSaveEdit}
+        hive={{
+          id: hiveDetail.id,
+          name: hiveDetail.name,
+          hive_id: hiveDetail.hive_id,
+          bee_info: hiveDetail.bee_info,
+        }}
+      />
     </div>
   );
 }

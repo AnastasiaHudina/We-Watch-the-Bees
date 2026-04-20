@@ -58,12 +58,13 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
               required
             />
-            {errors?.username && <p className="text-red-600 text-sm">{errors.username}</p>}
+
+            {errors?.username && (<p className="text-red-600 text-sm">{Array.isArray(errors.username) ? errors.username[0] : errors.username}</p>)}
           </div>
 
           <div>
             <label htmlFor="email" className="block text-gray-700 mb-2">
-              Email (необязательно)
+              Email
             </label>
             <input
               type="email"
@@ -72,7 +73,10 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
               value={formData.email}
               onChange={handleChange}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
+              required
             />
+
+            {errors?.email && (<p className="text-red-600 text-sm">{Array.isArray(errors.email) ? errors.email[0] : errors.email}</p>)}
           </div>
 
           <div>
@@ -88,7 +92,8 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500"
               required
             />
-            {errors?.password1 && <p className="text-red-600 text-sm">{errors.password1}</p>}
+            {errors?.password1 && (<p className="text-red-600 text-sm">{Array.isArray(errors.password1) ? errors.password1[0] : errors.password1}</p>)}
+            {errors?.password2 && (<p className="text-red-600 text-sm">{Array.isArray(errors.password2) ? errors.password2[0] : errors.password2}</p>)}
           </div>
 
           <div>

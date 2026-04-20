@@ -1,10 +1,11 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate, login, logout
 from apiary.models import Hive
 from sensors.models import Sensor, SensorReading
-from .serializers import HiveSerializer, HiveCreateSerializer, SensorReadingSerializer
+from .serializers import HiveSerializer, HiveCreateSerializer, SensorReadingSerializer, HiveUpdateSerializer
 from users.forms import RegisterForm
 
 # ---------- Пользователь ----------
@@ -35,12 +36,13 @@ class LogoutView(APIView):
         return Response({'success': True})
 
 class RegisterView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
+
     def post(self, request):
         form = RegisterForm(request.data)
         if form.is_valid():
             user = form.save()
-            login(request, user)
+            login(request, user)          # автоматический вход после регистрации
             return Response({'success': True, 'username': user.username})
         return Response({'success': False, 'errors': form.errors}, status=400)
 
@@ -89,6 +91,14 @@ class HiveDetailView(generics.RetrieveAPIView):
 
 class HiveDeleteView(generics.DestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Hive.objects.all()
+
+    def get_queryset(self):
+        return Hive.objects.filter(apiary=self.request.user.apiary)
+
+class HiveUpdateView(generics.UpdateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = HiveUpdateSerializer
     queryset = Hive.objects.all()
 
     def get_queryset(self):

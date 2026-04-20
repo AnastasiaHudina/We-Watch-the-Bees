@@ -51,18 +51,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const register = async (userData: { username: string; email: string; password1: string; password2: string }) => {
-    try {
-      const res = await api.post('/register/', userData);
-      if (res.data.success) {
-        const userRes = await api.get('/user/');
-        setUser(userRes.data);
-        return { success: true };
-      }
-      return { success: false, errors: res.data.errors };
-    } catch (err: any) {
-      return { success: false, errors: err.response?.data?.errors || 'Ошибка регистрации' };
+  try {
+    const res = await api.post('/register/', userData);
+    if (res.data.success) {
+      // После успешной регистрации пользователь уже залогинен (бэкенд вызвал login)
+      const userRes = await api.get('/user/');
+      setUser(userRes.data);
+      return { success: true };
     }
-  };
+    return { success: false, errors: res.data.errors };
+  } catch (err: any) {
+    return { success: false, errors: err.response?.data?.errors || 'Ошибка регистрации' };
+  }
+};
 
   const value = { user, loading, login, logout, register };
 

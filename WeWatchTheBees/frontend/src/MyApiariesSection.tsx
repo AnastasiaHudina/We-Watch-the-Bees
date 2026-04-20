@@ -54,7 +54,6 @@ export function MyApiariesSection() {
         sensor_types: newHive.sensor_types,
         hive_id: newHive.hive_id,
         bee_info: newHive.bee_info,
-        // sensor_ids пока не используем, можно добавить позже
       });
       await loadHives();
       setShowAddModal(false);
@@ -70,6 +69,10 @@ export function MyApiariesSection() {
     } catch (err) {
       console.error('Ошибка удаления', err);
     }
+  };
+
+  const handleHiveUpdated = () => {
+    loadHives(); // перезагрузить список после редактирования
   };
 
   const translateSensorType = (type: string) => {
@@ -148,6 +151,7 @@ export function MyApiariesSection() {
           hive={selectedHive}
           onClose={() => setSelectedHive(null)}
           onHiveDeleted={handleHiveDeleted}
+          onHiveUpdated={handleHiveUpdated}
         />
       )}
     </>
