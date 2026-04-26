@@ -18,4 +18,6 @@ urlpatterns = [
     # Sensors
     path('sensors/<int:sensor_id>/last/', views.LastSensorReadingView.as_view()),
     path('sensors/<int:sensor_id>/readings/', views.SensorReadingsView.as_view()),
+    path('sensors/', views.SensorListView.as_view()),
+    path('sensors/data/', views.SensorDataView.as_view()),
 ]

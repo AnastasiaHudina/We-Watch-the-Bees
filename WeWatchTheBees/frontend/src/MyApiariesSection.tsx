@@ -10,7 +10,11 @@ export interface Hive {
   name: string;
   hive_id?: string;
   bee_info?: string;
-  sensors?: any[];
+  sensors?: {
+    id: number;
+    sensor_type: string;
+    last_reading?: { value: number; timestamp: string };
+  }[];
 }
 
 export function MyApiariesSection() {
@@ -38,8 +42,14 @@ export function MyApiariesSection() {
   };
 
   useEffect(() => {
-    if (user) loadHives();
-  }, [user]);
+  if (user) {
+    loadHives(); // первая загрузка
+    const interval = setInterval(() => {
+      loadHives(); // периодическое обновление
+    }, 5000); // интервал 5 секунд
+    return () => clearInterval(interval); // очистка при уходе со страницы
+  }
+}, [user]);
 
   const handleAddHive = async (newHive: {
     name: string;
@@ -84,6 +94,28 @@ export function MyApiariesSection() {
     }
   };
 
+  // Функции цветовой индикации
+  const getTempColor = (value?: number) => {
+    if (!value) return 'text-gray-400';
+    if (value >= 38) return 'text-red-600 font-bold';
+    if (value >= 32) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+
+  const getHumColor = (value?: number) => {
+    if (!value) return 'text-gray-400';
+    if (value >= 85 || value <= 25) return 'text-red-600 font-bold';
+    if (value >= 75 || value <= 35) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+
+  const getWeightColor = (value?: number) => {
+    if (!value) return 'text-gray-400';
+    if (value <= 35 || value >= 65) return 'text-red-600 font-bold';
+    if (value <= 40 || value >= 60) return 'text-yellow-600';
+    return 'text-green-600';
+  };
+
   if (loading) return <div>Загрузка...</div>;
 
   return (
@@ -118,11 +150,25 @@ export function MyApiariesSection() {
                     <p className="text-gray-700 text-sm line-clamp-2">{hive.bee_info}</p>
                   </div>
                 )}
+                {/* Новый блок: датчики с показаниями и цветами */}
                 <div>
-                  <div className="text-gray-500 text-sm mb-1">Датчики</div>
-                  <p className="text-gray-700 text-sm line-clamp-1">
-                    {hive.sensors?.map(s => translateSensorType(s.sensor_type)).join(', ') || 'нет датчиков'}
-                  </p>
+                  <div className="text-gray-500 text-sm mb-1">Датчики и показания</div>
+                  <div className="space-y-1">
+                    {hive.sensors?.map(sensor => (
+                      <div key={sensor.id} className="flex justify-between text-sm">
+                        <span>{translateSensorType(sensor.sensor_type)}</span>
+                        <span className={
+                          sensor.sensor_type === 'temp' ? getTempColor(sensor.last_reading?.value) :
+                          sensor.sensor_type === 'hum' ? getHumColor(sensor.last_reading?.value) :
+                          sensor.sensor_type === 'weight' ? getWeightColor(sensor.last_reading?.value) : ''
+                        }>
+                          {sensor.last_reading ? sensor.last_reading.value +
+                            (sensor.sensor_type === 'temp' ? '°C' : sensor.sensor_type === 'hum' ? '%' : ' кг') : '—'}
+                        </span>
+                      </div>
+                    ))}
+                    {(!hive.sensors || hive.sensors.length === 0) && <span className="text-gray-500 text-sm">нет датчиков</span>}
+                  </div>
                 </div>
               </div>
             </div>

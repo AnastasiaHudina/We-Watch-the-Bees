@@ -1,7 +1,11 @@
 cd backend
 python manage.py runserver
 
+cd emulators
+python start_emulators.py
+
 cd frontend
 npm run dev
+
 
 http://127.0.0.1:8000/admin/

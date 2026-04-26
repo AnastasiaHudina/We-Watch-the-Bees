@@ -1,3 +1,5 @@
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -5,7 +7,7 @@ from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate, login, logout
 from apiary.models import Hive
 from sensors.models import Sensor, SensorReading
-from .serializers import HiveSerializer, HiveCreateSerializer, SensorReadingSerializer, HiveUpdateSerializer
+from .serializers import HiveSerializer, HiveCreateSerializer, SensorReadingSerializer, HiveUpdateSerializer, SensorSerializer
 from users.forms import RegisterForm
 
 # ---------- Пользователь ----------
@@ -127,3 +129,25 @@ class SensorReadingsView(generics.ListAPIView):
         from django.utils.timezone import now
         from datetime import timedelta
         return sensor.readings.filter(timestamp__gte=now() - timedelta(hours=24)).order_by('timestamp')
+
+class SensorListView(generics.ListAPIView):
+    permission_classes = [permissions.AllowAny] #[permissions.IsAuthenticated]
+    serializer_class = SensorSerializer
+    queryset = Sensor.objects.all()
+
+@method_decorator(csrf_exempt, name='dispatch')
+class SensorDataView(APIView):
+    permission_classes = [permissions.AllowAny]  # для упрощения; в проде лучше ограничить
+
+    def post(self, request):
+        device_id = request.data.get('device_id')
+        value = request.data.get('value')
+        if not device_id or value is None:
+            return Response({'error': 'device_id и value обязательны'}, status=400)
+        try:
+            sensor = Sensor.objects.get(device_id=device_id)
+        except Sensor.DoesNotExist:
+            return Response({'error': 'Датчик не найден'}, status=404)
+        reading = SensorReading.objects.create(sensor=sensor, value=value)
+        # Опционально: здесь можно добавить вызов функции проверки порогов для оповещений
+        return Response({'status': 'ok', 'id': reading.id}, status=201)
