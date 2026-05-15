@@ -11,19 +11,18 @@
 
 ## Быстрый старт
 
-1. Создайте виртуальное окружение и активируйте его.
-2. Установите зависимости:
-   - `pip install -r requirements.txt`
-3. Примените миграции:
-   - `python manage.py migrate`
-4. Создайте суперпользователя:
-   - `python manage.py createsuperuser`
-5. Запустите сервер:
-   - `python manage.py runserver`
+Полная инструкция (бэкенд + фронт + эмуляторы): [`../../info/docs/install.md`](../../info/docs/install.md).
 
-После этого откройте `http://127.0.0.1:8000/`.
+Кратко — только API:
+
+1. `python3 -m venv venv && source venv/bin/activate`
+2. `pip install -r requirements.txt`
+3. `python manage.py migrate && python manage.py createsuperuser`
+4. `python manage.py runserver` → http://127.0.0.1:8000/
+
+Интерфейс для пользователя — React на http://localhost:5173 (см. `../frontend/`).
 
 ## Документация
 
-- `docs/install.md` — расширенная инструкция по установке и запуску.
+- [`../../info/docs/install.md`](../../info/docs/install.md) — установка и запуск.
 

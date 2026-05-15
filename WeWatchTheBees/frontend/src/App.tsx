@@ -1,17 +1,38 @@
 import './globals.css';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
+import api from './api';
 import { Header } from './Header';
 import { MyApiariesSection } from './MyApiariesSection';
 import { KnowledgeBaseSection } from './KnowledgeBaseSection';
 import { ProfileSection } from './ProfileSection';
+import { AlertsSection } from './AlertsSection';
 import { StartScreen } from './StartScreen';
 import { AuthContext } from './context/AuthContext';
 
-type TabType = 'apiaries' | 'knowledge' | 'profile';
+type TabType = 'apiaries' | 'alerts' | 'knowledge' | 'profile';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('apiaries');
+  const [unreadAlerts, setUnreadAlerts] = useState(0);
   const { user, loading } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!user) {
+      setUnreadAlerts(0);
+      return;
+    }
+    const fetchUnread = async () => {
+      try {
+        const res = await api.get<{ count: number }>('/alerts/unread-count/');
+        setUnreadAlerts(res.data.count);
+      } catch {
+        /* ignore */
+      }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 5000);
+    return () => clearInterval(interval);
+  }, [user]);
 
   if (loading) {
     return (
@@ -60,7 +81,10 @@ export default function App() {
       </div>*/}
 
       <div className="relative z-10">
-        <Header />
+        <Header
+          unreadAlerts={unreadAlerts}
+          onOpenAlerts={() => setActiveTab('alerts')}
+        />
 
         {/* Tabs Navigation */}
         <div className="bg-white/80 backdrop-blur-sm shadow-sm border-b border-amber-200">
@@ -75,6 +99,21 @@ export default function App() {
                 }`}
               >
                 Моя Пасека
+              </button>
+              <button
+                onClick={() => setActiveTab('alerts')}
+                className={`px-6 py-4 transition-all border-b-2 whitespace-nowrap relative ${
+                  activeTab === 'alerts'
+                    ? 'border-amber-500 text-amber-700 bg-amber-50/50'
+                    : 'border-transparent text-gray-600 hover:text-amber-600 hover:bg-amber-50/30'
+                }`}
+              >
+                Оповещения
+                {unreadAlerts > 0 && (
+                  <span className="ml-2 inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold bg-red-500 text-white rounded-full">
+                    {unreadAlerts > 99 ? '99+' : unreadAlerts}
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => setActiveTab('knowledge')}
@@ -103,6 +142,7 @@ export default function App() {
         {/* Main Content */}
         <main className="max-w-6xl mx-auto px-4 py-8">
           {activeTab === 'apiaries' && <MyApiariesSection />}
+          {activeTab === 'alerts' && <AlertsSection onUnreadChange={setUnreadAlerts} />}
           {activeTab === 'knowledge' && <KnowledgeBaseSection />}
           {activeTab === 'profile' && <ProfileSection />}
         </main>

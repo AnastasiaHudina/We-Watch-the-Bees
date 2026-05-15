@@ -1,0 +1,18 @@
+# Повседневный запуск (из каталога WeWatchTheBees/)
+# Полная инструкция: info/docs/install.md
+
+# Терминал 1 — backend
+cd backend
+source venv/bin/activate
+python manage.py runserver
+
+# Терминал 2 — frontend
+cd frontend
+npm run dev
+# → http://localhost:5173
+
+# Терминал 3 — emulators (после регистрации и добавления улья)
+cd emulators
+python start_emulators.py
+
+# Админка: http://127.0.0.1:8000/admin/
