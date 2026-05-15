@@ -6,8 +6,16 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny
 from django.contrib.auth import authenticate, login, logout
 from apiary.models import Hive
-from sensors.models import Sensor, SensorReading
-from .serializers import HiveSerializer, HiveCreateSerializer, SensorReadingSerializer, HiveUpdateSerializer, SensorSerializer
+from sensors.models import Alert, Sensor, SensorReading
+from sensors.alert_service import check_and_create_alert
+from .serializers import (
+    AlertSerializer,
+    HiveSerializer,
+    HiveCreateSerializer,
+    SensorReadingSerializer,
+    HiveUpdateSerializer,
+    SensorSerializer,
+)
 from users.forms import RegisterForm
 
 # ---------- Пользователь ----------
@@ -148,6 +156,59 @@ class SensorDataView(APIView):
             sensor = Sensor.objects.get(device_id=device_id)
         except Sensor.DoesNotExist:
             return Response({'error': 'Датчик не найден'}, status=404)
-        reading = SensorReading.objects.create(sensor=sensor, value=value)
-        # Опционально: здесь можно добавить вызов функции проверки порогов для оповещений
-        return Response({'status': 'ok', 'id': reading.id}, status=201)
+        reading = SensorReading.objects.create(sensor=sensor, value=float(value))
+        alert = check_and_create_alert(sensor, float(value), reading)
+        return Response(
+            {
+                'status': 'ok',
+                'id': reading.id,
+                'alert_created': alert is not None,
+                'alert_id': alert.id if alert else None,
+            },
+            status=201,
+        )
+
+
+# ---------- Оповещения ----------
+class AlertListView(generics.ListAPIView):
+    serializer_class = AlertSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        qs = Alert.objects.filter(user=self.request.user).select_related('hive')
+        status_filter = self.request.query_params.get('status')
+        if status_filter in ('new', 'read'):
+            qs = qs.filter(status=status_filter)
+        hive_id = self.request.query_params.get('hive_id')
+        if hive_id:
+            qs = qs.filter(hive_id=hive_id, hive__apiary=self.request.user.apiary)
+        return qs
+
+
+class AlertUnreadCountView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        count = Alert.objects.filter(user=request.user, status='new').count()
+        return Response({'count': count})
+
+
+class AlertMarkReadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def patch(self, request, pk):
+        try:
+            alert = Alert.objects.get(pk=pk, user=request.user)
+        except Alert.DoesNotExist:
+            return Response({'error': 'Оповещение не найдено'}, status=404)
+        alert.status = 'read'
+        alert.save(update_fields=['status'])
+        return Response(AlertSerializer(alert).data)
+
+
+class AlertMarkAllReadView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        updated = Alert.objects.filter(user=request.user, status='new').update(status='read')
+        return Response({'updated': updated})

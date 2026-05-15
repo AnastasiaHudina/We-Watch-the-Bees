@@ -33,12 +33,22 @@ class Alert(models.Model):
         ("new", "new"),
         ("read", "read"),
     ]
+    SEVERITY_CHOICES = [
+        ("warning", "warning"),
+        ("critical", "critical"),
+    ]
+    SENSOR_TYPES = Sensor.SENSOR_TYPES
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="alerts")
     hive = models.ForeignKey(Hive, on_delete=models.CASCADE, related_name="alerts")
     message = models.CharField(max_length=255)
+    severity = models.CharField(max_length=10, choices=SEVERITY_CHOICES, default="warning")
+    sensor_type = models.CharField(max_length=10, choices=SENSOR_TYPES, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="new")
     timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-timestamp"]
 
     def __str__(self) -> str:
         return f"[{self.status}] {self.message}"

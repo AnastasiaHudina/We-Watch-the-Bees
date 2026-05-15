@@ -20,4 +20,10 @@ urlpatterns = [
     path('sensors/<int:sensor_id>/readings/', views.SensorReadingsView.as_view()),
     path('sensors/', views.SensorListView.as_view()),
     path('sensors/data/', views.SensorDataView.as_view()),
+
+    # Alerts
+    path('alerts/', views.AlertListView.as_view()),
+    path('alerts/unread-count/', views.AlertUnreadCountView.as_view()),
+    path('alerts/mark-all-read/', views.AlertMarkAllReadView.as_view()),
+    path('alerts/<int:pk>/read/', views.AlertMarkReadView.as_view()),
 ]

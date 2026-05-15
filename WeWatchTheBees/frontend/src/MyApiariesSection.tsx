@@ -4,6 +4,7 @@ import api from './api';
 import { AuthContext } from './context/AuthContext';
 import { AddHiveModal } from './AddHiveModal';
 import { HiveCardModal } from './HiveCardModal';
+import { getTempColor, getHumColor, getWeightColor } from './thresholds';
 
 export interface Hive {
   id: number;
@@ -92,28 +93,6 @@ export function MyApiariesSection() {
       case 'weight': return 'Вес';
       default: return type;
     }
-  };
-
-  // Функции цветовой индикации
-  const getTempColor = (value?: number) => {
-    if (!value) return 'text-gray-400';
-    if (value >= 38) return 'text-red-600 font-bold';
-    if (value >= 32) return 'text-yellow-600';
-    return 'text-green-600';
-  };
-
-  const getHumColor = (value?: number) => {
-    if (!value) return 'text-gray-400';
-    if (value >= 85 || value <= 25) return 'text-red-600 font-bold';
-    if (value >= 75 || value <= 35) return 'text-yellow-600';
-    return 'text-green-600';
-  };
-
-  const getWeightColor = (value?: number) => {
-    if (!value) return 'text-gray-400';
-    if (value <= 35 || value >= 65) return 'text-red-600 font-bold';
-    if (value <= 40 || value >= 60) return 'text-yellow-600';
-    return 'text-green-600';
   };
 
   if (loading) return <div>Загрузка...</div>;

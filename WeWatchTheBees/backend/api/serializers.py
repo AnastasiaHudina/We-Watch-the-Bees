@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from apiary.models import Hive
-from sensors.models import Sensor, SensorReading
+from sensors.models import Alert, Sensor, SensorReading
 
 class SensorReadingSerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,6 +42,32 @@ class HiveCreateSerializer(serializers.ModelSerializer):
                 device_id=f"{hive.id}_{stype}_{hive.name}"
             )
         return hive
+
+
+class AlertSerializer(serializers.ModelSerializer):
+    hive_name = serializers.CharField(source="hive.name", read_only=True)
+
+    class Meta:
+        model = Alert
+        fields = [
+            "id",
+            "hive",
+            "hive_name",
+            "message",
+            "severity",
+            "sensor_type",
+            "status",
+            "timestamp",
+        ]
+        read_only_fields = [
+            "id",
+            "hive",
+            "hive_name",
+            "message",
+            "severity",
+            "sensor_type",
+            "timestamp",
+        ]
 
 
 class HiveUpdateSerializer(serializers.ModelSerializer):
