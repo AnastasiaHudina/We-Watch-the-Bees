@@ -10,11 +10,12 @@
 
 ```
 We-Watch-the-Bees/
-├── WeWatchTheBees/     # приложение (backend, frontend, emulators)
-└── info/               # документация и заметки (не код)
-    ├── docs/           # PDF, install.md
-    ├── dev/            # быстрый старт, учётные данные для разработки
-    └── archive/        # устаревшие черновики
+├── WeWatchTheBees/           # приложение (backend, frontend, emulators)
+├── Diagrams + Artefacts/     # UML-диаграммы и другие бизнес-артефакты
+└── info/                     # документация и заметки (не код)
+    ├── docs/                 # PDF, install.md
+    ├── dev/                  # быстрый старт, учётные данные для разработки
+    └── archive/              # устаревшие черновики
 ```
 
 Подробнее о папке `info/` — в [info/README.md](info/README.md).
